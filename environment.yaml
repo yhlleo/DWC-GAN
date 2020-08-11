@@ -1,0 +1,26 @@
+name: dwcgan
+channels:
+- peterjc123
+- conda-forge
+- pytorch
+- anaconda
+dependencies:
+- python=3.5.5
+- pytorch=0.4.1
+- cudnn=7.1.2
+- scipy
+- scikit-image
+- scikit-learn
+- torchvision==0.2.1
+- pip:
+  - dominate==2.3.1
+  - Pillow==5.0.0
+  - numpy==1.15.0
+  - visdom==0.1.7
+  - matplotlib
+  - tensorboard
+  - tensorboardX
+  - pyyaml
+  - easydict
+  - fasttext
+  - nltk
