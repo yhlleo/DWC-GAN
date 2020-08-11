@@ -40,7 +40,7 @@ sh ./scripts/train_celeba_faces.sh <gpu_id> 0
 If our project is useful for you, please cite our papers:
 
 ```
-@inproceedings{liu2019gesture,
+@inproceedings{liu2020describe,
   title={Describe What to Change: A Text-guided Unsupervised Image-to-Image Translation Approach},
   author={Liu, Yahui and De Nadai, Marco and Cai, Deng and Li, Huayang and Alameda-Pineda, Xavier and Sebe, Nicu and Lepri, Bruno},
   booktitle={Proceedings of the 28th ACM International Conference on Multimedia},
