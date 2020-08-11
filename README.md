@@ -1,6 +1,6 @@
 ## DWC-GAN
 
-Describe What to Change: A Text-guided Unsupervised Image-to-Image Translation Approach, to appear in ACM International Conference on Multimedia(**ACM MM**), 2020. [arXiv]|[[code]](https://github.com/yhlleo/DWC-GAN)
+Describe What to Change: A Text-guided Unsupervised Image-to-Image Translation Approach, to appear in ACM International Conference on Multimedia(**ACM MM**), 2020. [[arXiv]](https://arxiv.org/abs/2008.04200)|[[code]](https://github.com/yhlleo/DWC-GAN)
 
 ![](./figures/framework.png)
 
