@@ -7,7 +7,7 @@ Describe What to Change: A Text-guided Unsupervised Image-to-Image Translation A
 
 ### Configuration
 
-See the [`environment.yml`](./environment.yaml). We provide an user-friendly configuring method via Conda system, and you can create a new Conda environment using the command:
+See the [`environment.yaml`](./environment.yaml). We provide an user-friendly configuring method via Conda system, and you can create a new Conda environment using the command:
 
 ```
 conda env create -f environment.yaml
@@ -42,7 +42,7 @@ If our project is useful for you, please cite our papers:
 ```
 @inproceedings{liu2019gesture,
   title={Describe What to Change: A Text-guided Unsupervised Image-to-Image Translation Approach},
-  author={Liu, Yahui and De Nadai, Marco and Cai, Deng and Sebe, Nicu and Lepri, Bruno},
+  author={Liu, Yahui and De Nadai, Marco and Cai, Deng and Li, Huayang and Alameda-Pineda, Xavier and Sebe, Nicu and Lepri, Bruno},
   booktitle={Proceedings of the 28th ACM International Conference on Multimedia},
   year={2020}
 }
