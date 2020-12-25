@@ -27,6 +27,10 @@ datasets
        |__list_attr_celeba.txt
 ```
 
+### Pretrained Models
+
+ - CelebA: google drive (coming soon)
+
 ### Training & Testing
 
  - Train:
@@ -34,6 +38,10 @@ datasets
 ```
 sh ./scripts/train_celeba_faces.sh <gpu_id> 0
 ```
+
+### Evaluation codes
+
+We evaluate the performances of the compared models mainly based on this repo: [GAN-Metrics](https://github.com/yhlleo/GAN-Metrics)
 
 ### References
 
