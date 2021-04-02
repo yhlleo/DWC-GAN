@@ -15,7 +15,7 @@ from .celeba_text import labels2text as lab2txt
 
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from vocab import Vocab, ListsToTensor
+from celebA_vocab import Vocab, ListsToTensor
 
 class CelebA(data.Dataset):
     """Dataset class for the CelebA dataset."""

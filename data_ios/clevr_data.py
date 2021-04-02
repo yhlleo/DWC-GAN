@@ -7,6 +7,11 @@ import torch
 from torch.utils import data
 from torchvision import transforms
 
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from clevr_vocab import Vocab, ListsToTensor
+
 
 class CLEVR(data.Dataset):
 	"""Dataset class for the CLEVR dataset."""
@@ -14,6 +19,7 @@ class CLEVR(data.Dataset):
 		self.img_dir = join(dataroot, mode)
 		self.data = json.load(open(annotations, 'r'))
 		self.normalize = transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+		self.vocab = Vocab(dataset='Clevr')
 
 	def __len__(self):
 		return len(self.data)
@@ -29,9 +35,12 @@ class CLEVR(data.Dataset):
 		src_attr = torch.tensor(data_point['a']).float()
 		trg_attr = torch.tensor(data_point['ta']).float()
 
-		import pdb; pdb.set_trace()
 		cmd = data_point['cd']
-		return image, src_attr, trg_attr#, cmd_tensor, txt_lens
+		cmd_tensor, txt_lens = ListsToTensor([cmd.split()], self.vocab, mx_len=80)
+		cmd_tensor = torch.from_numpy(cmd_tensor).squeeze(0).long()
+		txt_lens = torch.from_numpy(txt_lens).squeeze(0).long()
+
+		return image, src_attr, trg_attr, cmd_tensor, txt_lens
 
 
 if __name__=="__main__":
