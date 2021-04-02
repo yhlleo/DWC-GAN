@@ -40,7 +40,7 @@ class CLEVR(data.Dataset):
 		cmd_tensor = torch.from_numpy(cmd_tensor).squeeze(0).long()
 		txt_lens = torch.from_numpy(txt_lens).squeeze(0).long()
 
-		return image, src_attr, trg_attr, cmd_tensor, txt_lens
+		return image, src_attr, trg_attr, cmd_tensor, txt_lens, cmd
 
 
 if __name__=="__main__":
