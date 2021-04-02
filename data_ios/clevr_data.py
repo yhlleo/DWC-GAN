@@ -44,7 +44,7 @@ class CLEVR(data.Dataset):
 
 if __name__=="__main__":
     transform = []
-    transform.append(T.Resize(128))
+    transform.append(T.Resize((128, 128)))
     transform.append(T.ToTensor())
     transform.append(T.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)))
     transform = T.Compose(transform)
