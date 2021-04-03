@@ -10,7 +10,7 @@ from torchvision import transforms as T
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from clevr_vocab import Vocab, ListsToTensor
+from vocab import Vocab, ListsToTensor
 
 
 class CLEVR(data.Dataset):
@@ -33,6 +33,9 @@ class CLEVR(data.Dataset):
 
         src_attr = torch.tensor(data_point['a']).float()
         trg_attr = torch.tensor(data_point['ta']).float()
+        if trg_attr.shape[0] > 1:
+            trg_idx = np.random.randint(trg_attr.shape[0])
+            trg_attr = trg_attr[trg_idx]
 
         cmd = data_point['cd']
         cmd_tensor, txt_lens = ListsToTensor([cmd.split()], self.vocab, mx_len=80)

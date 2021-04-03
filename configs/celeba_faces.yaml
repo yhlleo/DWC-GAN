@@ -76,7 +76,9 @@ num_workers: 2                # number of data loading threads
 image_size: 128               # first resize the shortest image side to this size
 crop_size: 178                # random crop image of this height
 data_root: ../datasets/celeba/images
-attr_path: ./datasets/celeba/list_attr_celeba.txt
+attr_path:
+  train: ./datasets/celeba/list_attr_celeba.txt
+  val: ./datasets/celeba/list_attr_celeba.txt
 pretrained_embed: './datasets/embeddings.npy'
 use_pretrain: False
 gen_pretrain: ./models/celeba_gen.pt

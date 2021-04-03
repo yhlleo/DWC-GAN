@@ -23,7 +23,7 @@ cudnn.benchmark = True
 torch.manual_seed(1234)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--config', type=str, default='configs/celeba_faces.yaml', help='Path to the config file.')
+parser.add_argument('--config', type=str, default='configs/clevr.yaml', help='Path to the config file.')
 parser.add_argument('--output_path', type=str, default='.', help="outputs path")
 parser.add_argument("--resume", type=int, default=0)
 parser.add_argument('--gpu_ids', type=str, default='0', help='gpu list')
@@ -51,9 +51,9 @@ if dataset_name == "CelebA":
                       'Smiling', 'Young',  'Eyeglasses', 'No_Beard']
 
 train_loader = get_loader(config['data_root'], config['crop_size'], config['image_size'], 
-    config['batch_size'], attr_path, selected_attrs, dataset_name, 'train', config['num_workers'])
+    config['batch_size'], attr_path['train'], selected_attrs, dataset_name, 'train', config['num_workers'])
 test_loader  = get_loader(config['data_root'], config['crop_size'], config['image_size'], 
-    1, attr_path, selected_attrs, dataset_name, 'test', config['num_workers'])
+    1, attr_path['val'], selected_attrs, dataset_name, 'test' if dataset_name=='CelebA' else 'val', config['num_workers'])
 
 train_display        = [train_loader.dataset[i] for i in range(display_size)]
 train_display_images = torch.stack([item[0] for item in train_display]).to(device)
@@ -89,7 +89,7 @@ trainer.copy_nets()
 while True:
     for it, data_iter in enumerate(train_loader):
         #if config['dataset'] == 'CelebA':
-        x_real, label_src, label_trg, txt_src2trg, txt_lens = data_iter
+        x_real, label_src, label_trg, txt_src2trg, txt_lens, cmd = data_iter
         c_src = asign_label(label_src, config['c_dim'], dataset_name).to(device)
         c_trg = asign_label(label_trg, config['c_dim'], dataset_name).to(device)
 
