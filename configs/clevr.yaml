@@ -35,15 +35,15 @@ use_r1: False
 dist_w: 0.1                   # weight of distance constraints 
 dist_mode: kls                # em, Earth Mover; kl/kls, Kullback–Leibler Divergence
 
-c_dim: 8                      # latent dimension for each attrobute
+c_dim: 150                      # latent dimension for each attrobute
 v_dim: 1                      # length of style code of each domain
 
 # model options
 gen:
   dim: 64                     # number of filters in the bottommost layer
   mlp_dim: 256                # number of filters in MLP
-  c_dim: 8                    # latent dimension for each attrobute
-  num_cls: 8                 
+  c_dim: 150                    # latent dimension for each attrobute
+  num_cls: 150                 
   activ: relu                 # activation function [relu/lrelu/prelu/selu/tanh]
   style_downsample: 5         # number of downsampling layers in style encoder
   content_downsample: 2       # number of downsampling layers in content encoder
@@ -64,7 +64,7 @@ dis:
   gan_type: lsgan             # GAN loss [lsgan/nsgan/wgan]
   num_scales: 2               # number of scales
   pad_type: reflect           # padding type [zero/reflect]
-  num_cls: 8
+  num_cls: 150
   image_size: 128
   dataset: Clevr
 
@@ -73,10 +73,10 @@ input_dim: 3                  # number of image channels [1/3]
 num_workers: 2                # number of data loading threads
 image_size: 128               # first resize the shortest image side to this size
 crop_size: 128                # random crop image of this height
-data_root: /media/namrata/Data/data/CLEVR_v1.0/images
+data_root: /data/namrata/datasets/CLEVR_v1.0/images
 attr_path: 
-  train: /media/namrata/Data/data/CLEVR_train_data_full.json
-  val: /media/namrata/Data/data/CLEVR_val_data_full.json
+  train: /data/namrata/clevr/CLEVR_train_data_full.json
+  val: /data/namrata/clevr/CLEVR_val_data_full.json
 pretrained_embed: './datasets/embeddings.npy'
 use_pretrain: False
 gen_pretrain: ./models/clevr_gen.pt

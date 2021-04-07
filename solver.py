@@ -79,7 +79,7 @@ class Solver(nn.Module):
         # Load VGG model if needed
         if 'vgg_w' in configs.keys() and configs['vgg_w'] > 0:
             # self.vgg = load_vgg16(configs['vgg_model_path'] + '/models').to(device)
-            self.vgg = models.vgg16(pretrained=True)
+            self.vgg = models.vgg16(pretrained=True).features
             self.vgg.eval()
             for param in self.vgg.parameters():
                 param.requires_grad = False

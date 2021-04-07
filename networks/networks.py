@@ -79,7 +79,7 @@ class MsImageDis(nn.Module):
         """Compute binary or softmax cross entropy loss."""
         #if dataset == 'CelebA':
         #    return self.criterion(logit, target)
-        if dataset in ['CelebA', 'CUB200']:
+        if dataset in ['CelebA', 'CUB200', 'Clevr']:
             return F.binary_cross_entropy_with_logits(logit, target, reduction='mean')
         else:# dataset in ['RaFD', 'edges2shoes', 'Digits']
             return F.cross_entropy(logit, target)

@@ -36,6 +36,7 @@ class CLEVR(data.Dataset):
         if trg_attr.shape[0] > 1:
             trg_idx = np.random.randint(trg_attr.shape[0])
             trg_attr = trg_attr[trg_idx]
+        trg_attr = trg_attr.squeeze()
 
         cmd = data_point['cd']
         cmd_tensor, txt_lens = ListsToTensor([cmd.split()], self.vocab, mx_len=80)
