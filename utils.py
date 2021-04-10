@@ -346,3 +346,10 @@ def pytorch03_to_pytorch04(state_dict_base, trainer_name):
     state_dict['a'] = __conversion_core(state_dict_base['a'], trainer_name)
     state_dict['b'] = __conversion_core(state_dict_base['b'], trainer_name)
     return state_dict
+
+import wandb
+def init_wandb(cfg: dict, name:str) -> None:
+    wandb.init(project="dwc-gan", name=name, config=cfg)
+
+def wandb_log(step, stats):
+    wandb.log(stats, step=step)

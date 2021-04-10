@@ -5,9 +5,11 @@ Licensed under the CC BY-NC-SA 4.0 license (https://creativecommons.org/licenses
 
 import os
 import sys
+import wandb
 import shutil
 import pickle
 import argparse
+from tqdm import tqdm
 
 import torch
 from torch.autograd import Variable
@@ -17,7 +19,7 @@ import tensorboardX
 from tools import asign_label
 from data_loader import get_loader
 from solver import Solver
-from utils import prepare_sub_folder, write_html, write_loss, get_config, write_2images_single, Timer
+from utils import prepare_sub_folder, write_html, write_loss, get_config, write_2images_single, Timer, init_wandb, wandb_log
 
 cudnn.benchmark = True
 torch.manual_seed(1234)
@@ -40,6 +42,8 @@ dataset_name = config['dataset']
 # get device name: CPU or GPU
 print(opts.gpu_ids)
 device = torch.device('cuda:{}'.format(opts.gpu_ids[0])) if opts.gpu_ids else torch.device('cpu')
+
+init_wandb(config, opts.config)
 
 if opts.n_critic < 1: 
     opts.n_critic = 1 
@@ -87,9 +91,12 @@ iterations = trainer.resume(checkpoint_directory, config) if opts.resume else 0
 trainer.copy_nets()
 
 while True:
-    for it, data_iter in enumerate(train_loader):
+    iterator = tqdm(range(len(train_loader)))
+    data_iter = iter(train_loader)
+    for it in iterator:
+        data = next(data_iter)
         #if config['dataset'] == 'CelebA':
-        x_real, label_src, label_trg, txt_src2trg, txt_lens, cmd = data_iter
+        x_real, label_src, label_trg, txt_src2trg, txt_lens, cmd = data
         c_src = asign_label(label_src, config['c_dim'], dataset_name).to(device)
         c_trg = asign_label(label_trg, config['c_dim'], dataset_name).to(device)
 
@@ -99,23 +106,27 @@ while True:
         txt_src2trg = txt_src2trg.to(device)
         txt_lens = txt_lens.to(device)
         
-        with Timer("Elapsed time in update: %f"):
-            trainer.dis_update(x_real, c_src, c_trg, txt_src2trg, txt_lens, label_src, 
-                label_trg, config, iterations)
-            if (iterations+1) % opts.n_critic == 0:
-                trainer.gen_update(x_real, c_src, c_trg, txt_src2trg, txt_lens, 
-                    label_src, label_trg, config, iterations)
-            torch.cuda.synchronize()
-            trainer.smooth_moving()
+        trainer.dis_update(x_real, c_src, c_trg, txt_src2trg, txt_lens, label_src, 
+            label_trg, config, iterations)
+        if (iterations+1) % opts.n_critic == 0:
+            trainer.gen_update(x_real, c_src, c_trg, txt_src2trg, txt_lens, 
+                label_src, label_trg, config, iterations)
+        torch.cuda.synchronize()
+        trainer.smooth_moving()
         trainer.update_learning_rate()
         trainer.update_attention_status(iterations)
 
         # Dump training stats in log file
         if (iterations + 1) % config['log_iter'] == 0:
-            print("Iteration: %08d/%08d" % (iterations + 1, max_iter))
-            print('Loss: gen %.04f, dis %.04f' % (trainer.loss_gen_total.data, trainer.loss_dis_all.data))
+            # print("Iteration: %08d/%08d" % (iterations + 1, max_iter))
+            iterator.set_description('Loss: gen %.04f, dis %.04f' % (trainer.loss_gen_total.data, trainer.loss_dis_all.data))
             write_loss(iterations, trainer, train_writer)
-            print('Iter {}, lr {}, ds {}'.format(iterations, trainer.gen_opt.param_groups[0]['lr'], trainer.init_ds_w))
+            # print('Iter {}, lr {}, ds {}'.format(iterations, trainer.gen_opt.param_groups[0]['lr'], trainer.init_ds_w))
+            stats = {'train/gen_loss': trainer.loss_gen_total.data,
+                     'train/dis_loss': trainer.loss_dis_all.data
+            }
+            wandb_log(iterations, stats)
+
 
         # Write images
         if (iterations + 1) % config['image_save_iter'] == 0:
@@ -124,6 +135,7 @@ while True:
                     test_display_txt, test_display_txt_lens)
                 train_image_outputs = trainer.sample(train_display_images, 
                     train_display_txt, train_display_txt_lens)
+            import pdb; pdb.set_trace()
             write_2images_single(test_image_outputs, display_size, 
                 image_directory, 'test_%08d' % (iterations + 1))
             write_2images_single(train_image_outputs, display_size, 
