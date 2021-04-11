@@ -135,7 +135,6 @@ while True:
                     test_display_txt, test_display_txt_lens)
                 train_image_outputs = trainer.sample(train_display_images, 
                     train_display_txt, train_display_txt_lens)
-            import pdb; pdb.set_trace()
             write_2images_single(test_image_outputs, display_size, 
                 image_directory, 'test_%08d' % (iterations + 1))
             write_2images_single(train_image_outputs, display_size, 
@@ -144,12 +143,12 @@ while True:
             write_html(output_directory + "/index.html", iterations + 1, 
                 config['image_save_iter'], 'images')
 
-        if (iterations + 1) % config['image_display_iter'] == 0:
-            with torch.no_grad():
-                image_outputs = trainer.sample(train_display_images, 
-                    train_display_txt, train_display_txt_lens)
-            write_2images_single(image_outputs, display_size, 
-                image_directory, 'train_current')
+        # if (iterations + 1) % config['image_display_iter'] == 0:
+        #     with torch.no_grad():
+        #         image_outputs = trainer.sample(train_display_images, 
+        #             train_display_txt, train_display_txt_lens)
+        #     write_2images_single(image_outputs, display_size, 
+        #         image_directory, 'train_current')
         
         # Save network weights
         if (iterations + 1) % config['snapshot_save_iter'] == 0:

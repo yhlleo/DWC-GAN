@@ -4,10 +4,12 @@ Licensed under the CC BY-NC-SA 4.0 license (https://creativecommons.org/licenses
 """
 
 import os
+from os.path import basename, splitext
 import math
 import time
 import codecs
 import yaml
+import wandb
 import numpy as np
 
 try:
@@ -70,6 +72,9 @@ def __write_images(image_outputs, display_image_num, file_name):
     image_outputs = [images.expand(-1, 3, -1, -1) for images in image_outputs] # expand gray-scale images to 3 channels
     image_tensor = torch.cat([images[:display_image_num] for images in image_outputs], 0)
     image_grid = vutils.make_grid(image_tensor.data, nrow=display_image_num, padding=0, normalize=True)
+    step = splitext(basename(file_name))[0].split('_')[-1]
+    mode = splitext(basename(file_name))[0].split('_')[-2]
+    wandb.log({"{}_gen_a2b".format(mode): wandb.Image(image_grid)}, step=int(step))
     vutils.save_image(image_grid, file_name, nrow=1)
 
 
@@ -347,7 +352,6 @@ def pytorch03_to_pytorch04(state_dict_base, trainer_name):
     state_dict['b'] = __conversion_core(state_dict_base['b'], trainer_name)
     return state_dict
 
-import wandb
 def init_wandb(cfg: dict, name:str) -> None:
     wandb.init(project="dwc-gan", name=name, config=cfg)
 
