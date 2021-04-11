@@ -69,6 +69,13 @@ train_display_txt_lens = torch.stack([item[4] for item in train_display]).to(dev
 test_display_txt    = torch.stack([item[3] for item in test_display]).to(device)
 test_display_txt_lens = torch.stack([item[4] for item in test_display]).to(device)
 
+if dataset_name == "Clevr":
+    train_display_cmd = ' | '.join(["{}: {}".format(i+1, item[5]) for i, item in enumerate(train_display)])
+    test_display_cmd = ' | '.join(["{}: {}".format(i+1, item[5]) for i, item in enumerate(test_display)])
+else:
+    train_display_cmd = None
+    test_display_cmd = None
+
 pretrained_embed=None
 if opts.use_pretrained_embed:
     with open(config['pretrained_embed'], 'rb') as fin:
@@ -136,9 +143,9 @@ while True:
                 train_image_outputs = trainer.sample(train_display_images, 
                     train_display_txt, train_display_txt_lens)
             write_2images_single(test_image_outputs, display_size, 
-                image_directory, 'test_%08d' % (iterations + 1))
+                image_directory, 'test_%08d' % (iterations + 1), test_display_cmd)
             write_2images_single(train_image_outputs, display_size, 
-                image_directory, 'train_%08d' % (iterations + 1))
+                image_directory, 'train_%08d' % (iterations + 1), train_display_cmd)
             # HTML
             write_html(output_directory + "/index.html", iterations + 1, 
                 config['image_save_iter'], 'images')

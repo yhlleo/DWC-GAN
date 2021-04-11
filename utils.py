@@ -68,24 +68,24 @@ def eformat(f, prec):
     return "%se%d"%(mantissa, int(exp))
 
 
-def __write_images(image_outputs, display_image_num, file_name):
+def __write_images(image_outputs, display_image_num, file_name, commands=None):
     image_outputs = [images.expand(-1, 3, -1, -1) for images in image_outputs] # expand gray-scale images to 3 channels
     image_tensor = torch.cat([images[:display_image_num] for images in image_outputs], 0)
     image_grid = vutils.make_grid(image_tensor.data, nrow=display_image_num, padding=0, normalize=True)
     step = splitext(basename(file_name))[0].split('_')[-1]
     mode = splitext(basename(file_name))[0].split('_')[-2]
-    wandb.log({"{}_gen_a2b".format(mode): wandb.Image(image_grid)}, step=int(step))
+    wandb.log({"{}_gen_a2b".format(mode): wandb.Image(image_grid, caption=commands)}, step=int(step))
     vutils.save_image(image_grid, file_name, nrow=1)
 
 
-def write_2images(image_outputs, display_image_num, image_directory, postfix):
+def write_2images(image_outputs, display_image_num, image_directory, postfix, commands=None):
     n = len(image_outputs)
-    __write_images(image_outputs[0:n//2], display_image_num, '%s/gen_a2b_%s.jpg' % (image_directory, postfix))
-    __write_images(image_outputs[n//2:n], display_image_num, '%s/gen_b2a_%s.jpg' % (image_directory, postfix))
+    __write_images(image_outputs[0:n//2], display_image_num, '%s/gen_a2b_%s.jpg' % (image_directory, postfix), commands)
+    __write_images(image_outputs[n//2:n], display_image_num, '%s/gen_b2a_%s.jpg' % (image_directory, postfix), commands)
 
-def write_2images_single(image_outputs, display_image_num, image_directory, postfix):
+def write_2images_single(image_outputs, display_image_num, image_directory, postfix, commands=None):
     n = len(image_outputs)
-    __write_images(image_outputs, display_image_num, '%s/gen_a2b_%s.jpg' % (image_directory, postfix))
+    __write_images(image_outputs, display_image_num, '%s/gen_a2b_%s.jpg' % (image_directory, postfix), commands)
 
 def prepare_sub_folder(output_directory):
     image_directory = os.path.join(output_directory, 'images')
