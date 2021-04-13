@@ -1,16 +1,14 @@
-# Copyright (C) 2017 NVIDIA Corporation.  All rights reserved.
-# Licensed under the CC BY-NC-SA 4.0 license (https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode).
-dataset: CelebA               # dataset name              
+dataset: Clevr               # dataset name              
 # logger options
-image_save_iter: 10000        # How often do you want to save output images during training
+image_save_iter: 10           # How often do you want to save output images during training
 image_display_iter: 500       # How often do you want to display output images during training
 display_size: 8               # How many images do you want to display each time
 snapshot_save_iter: 10000     # How often do you want to save trained models
-log_iter: 2                 # How often do you want to log the training stats
+log_iter: 10                  # How often do you want to log the training stats
 
 # optimization options
-max_iter: 500000             # maximum number of training iterations
-batch_size: 1                 # batch size
+max_iter: 1000000             # maximum number of training iterations
+batch_size: 8                 # batch size
 weight_decay: 0.0001          # weight decay
 beta1: 0.5                    # Adam parameter
 beta2: 0.999                  # Adam parameter
@@ -37,15 +35,15 @@ use_r1: False
 dist_w: 0.1                   # weight of distance constraints 
 dist_mode: kls                # em, Earth Mover; kl/kls, Kullback–Leibler Divergence
 
-c_dim: 8                      # latent dimension for each attrobute
+c_dim: 150                      # latent dimension for each attrobute
 v_dim: 1                      # length of style code of each domain
 
 # model options
 gen:
   dim: 64                     # number of filters in the bottommost layer
   mlp_dim: 256                # number of filters in MLP
-  c_dim: 8                    # latent dimension for each attrobute
-  num_cls: 8                 
+  c_dim: 150                    # latent dimension for each attrobute
+  num_cls: 150                 
   activ: relu                 # activation function [relu/lrelu/prelu/selu/tanh]
   style_downsample: 5         # number of downsampling layers in style encoder
   content_downsample: 2       # number of downsampling layers in content encoder
@@ -66,28 +64,20 @@ dis:
   gan_type: lsgan             # GAN loss [lsgan/nsgan/wgan]
   num_scales: 2               # number of scales
   pad_type: reflect           # padding type [zero/reflect]
-  num_cls: 8
+  num_cls: 150
   image_size: 128
-  dataset: CelebA
+  dataset: Clevr
 
 # data options
 input_dim: 3                  # number of image channels [1/3]
-num_workers: 1     #2           # number of data loading threads
+num_workers: 2                # number of data loading threads
 image_size: 128               # first resize the shortest image side to this size
-crop_size: 178                # random crop image of this height
-# data_root: ../datasets/celeba/images
-# attr_path: ./datasets/celeba/list_attr_celeba.txt
-
-data_root: datasets/celeba/images
-attr_path: datasets/celeba/list_attr_celeba.txt
-
-#pretrained_embed: './datasets/embeddings.npy'
-pretrained_embed: 'datasets/embeddings.npy'
-
-use_pretrain: True
-
-gen_pretrain: outputs/celeba_faces/checkpoints/gen_00040000.pt
-dis_pretrain: outputs/celeba_faces/checkpoints/dis_00040000.pt
-
-# gen_pretrain: ./models/celeba_gen.pt
-# dis_pretrain: ./models/celeba_dis.pt
+crop_size: 128                # random crop image of this height
+data_root: /data/namrata/datasets/CLEVR_v1.0/images
+attr_path: 
+  train: /data/namrata/clevr/CLEVR_train_data_full.json
+  val: /data/namrata/clevr/CLEVR_val_data_full.json
+pretrained_embed: './datasets/embeddings.npy'
+use_pretrain: False
+gen_pretrain: ./models/clevr_gen.pt
+dis_pretrain: ./models/clevr_dis.pt

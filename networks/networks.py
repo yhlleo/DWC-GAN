@@ -295,6 +295,10 @@ class TxtEncoder(nn.Module):
         bidirectional=True, pretrained_embed=None):
         super(TxtEncoder, self).__init__()
         self.vocab  = vocab
+        print('vocab.getTextLists', vocab.getTextLists)
+        stop
+
+
         self.embed_dim = embed_dim
         self.hidden_size = hidden_size
         self.num_layers = num_layers
@@ -324,6 +328,10 @@ class TxtEncoder(nn.Module):
         self.fcVar = nn.Linear(hidden_size*4*num_layers, style_dim)
 
     def forward(self, style_ord, src_tokens, src_lengths):
+        print('src_tokens', src_tokens.shape) #seq_len, bsz 
+        print('src_lengths', src_lengths)
+        print('style_ord', style_ord)
+
         src_tokens = src_tokens.transpose(1,0)
         seq_len, bsz = src_tokens.size()
         ###
@@ -331,6 +339,9 @@ class TxtEncoder(nn.Module):
         sorted_src_tokens = src_tokens.index_select(1, indices)
         sorted_style_ord = style_ord.index_select(0, indices)
         ###
+
+        print('sorted_style_ord', sorted_style_ord)
+        
         x = self.embed_tokens(sorted_src_tokens)
         x = F.dropout(x, p=self.dropout_in, training=self.training)
         x = torch.cat([x, sorted_style_ord.expand(seq_len, -1, -1)], -1)
