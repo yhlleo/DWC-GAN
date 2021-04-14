@@ -105,49 +105,6 @@ vocab_celeba_list = [ # CelebA words
     "!"
 ]
 
-vocab_clevr_list = [ # Clevr words
-    "cylinder",
-    "cube",
-    "sphere",
-
-    "brown",
-    "gray",
-    "green",
-    "purple",
-    "blue",
-    "yellow",
-    "cyan",
-    "red",
-
-    "large",
-    "small",
-
-    "rubber",
-    "metal",
-
-    "move",
-    "change",
-    "add",
-    "remove",
-    "shift",
-    "transfer",
-    "alter",
-    "modify",
-    "append",
-    "delete",
-    "erase",
-    
-    "to",
-    "of",
-    "right",
-    "left",
-    "a",
-    ".",
-    ",",
-    " ",
-    "?",
-    "!"
-]
 
 vocab_cub200_list = [
     "leg",
@@ -212,8 +169,6 @@ class Vocab(object):
     def __init__(self, dataset='CelebA', with_SE=True):
         if dataset == 'CelebA':
             vocab = vocab_celeba_list
-        elif dataset == 'Clevr':
-            vocab = vocab_clevr_list
         else:
             vocab = vocab_cub200_list
 

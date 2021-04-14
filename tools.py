@@ -38,7 +38,7 @@ def create_labels(c_org, c_dim=5, dataset='CelebA', selected_attrs=None, device=
 
 
 def asign_label(label, c_dim=None, mode='CelebA', normalize=True):
-    if mode in ['CelebA', 'CUB200', 'Clevr']:
+    if mode in ['CelebA', 'CUB200']:
         asigned_label = label.clone()
     else: # mode in ['RaFD', 'A2B']
         asigned_label = label2onehot(label, c_dim)
