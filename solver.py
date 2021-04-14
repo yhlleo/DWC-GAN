@@ -26,9 +26,6 @@ class Solver(nn.Module):
         self.configs =  configs
 
         self.vocab = Vocab(dataset=configs['dataset'])
-        #print('self.vocab', self.vocab.itos)
-        #stop
-        
         # Initiate the networks
         self.gen = AdaINGen_v2(configs['input_dim'], self.vocab, configs['gen'], 
             pretrained_embed=pretrained_embed)  # auto-encoder for domain a
@@ -63,30 +60,8 @@ class Solver(nn.Module):
 
         # Setup the optimizers
         beta1, beta2 = configs['beta1'], configs['beta2']
-        
-        total_params = sum(p.numel() for p in self.gen.parameters())
-        print("total params before", total_params)
-        
-        trainable_params = sum(p.numel() for p in self.gen.parameters() if p.requires_grad)
-        print("trainable params with bert", trainable_params)
-        
-        #set BERT off
-        for param in self.gen.enc_txt.bert.parameters():
-            param.requires_grad = False
-            
-        #print("self.gen.enc_txt.bert.parameters()", self.gen.enc_txt.bert.parameters)
-        
-        #STOP
-            
-        trainable_params = sum(p.numel() for p in self.gen.parameters() if p.requires_grad)
-        print("trainable params exclude bert", trainable_params)
-        
-        #stop
-        
         dis_params = list(self.dis.parameters())
         gen_params = list(self.gen.parameters())
-        
-        
         self.dis_opt = torch.optim.Adam([p for p in dis_params if p.requires_grad],
                                         lr=lr, betas=(beta1, beta2), weight_decay=configs['weight_decay'])
         self.gen_opt = torch.optim.Adam([p for p in gen_params if p.requires_grad],
@@ -102,8 +77,7 @@ class Solver(nn.Module):
 
         # Load VGG model if needed
         if 'vgg_w' in configs.keys() and configs['vgg_w'] > 0:
-            #self.vgg = load_vgg16(configs['vgg_model_path'] + '/models').to(device)
-            self.vgg = load_vgg16('models').to(device)
+            self.vgg = load_vgg16(configs['vgg_model_path'] + '/models').to(device)
             self.vgg.eval()
             for param in self.vgg.parameters():
                 param.requires_grad = False
@@ -165,19 +139,17 @@ class Solver(nn.Module):
                     z_trg[i, j*self.c_dim:(j+1)*self.c_dim] = z_src[i, j*self.c_dim:(j+1)*self.c_dim].clone()
         return z_trg
 
-    def forward(self, x_real, txt_src2trg, testing_bert, config_wb, txt_lens):
+    def forward(self, x_real, txt_src2trg, txt_lens):
         content, style_src, _ = self.gen.encode(x_real)
-        style_txt, _ = self.gen.encode_txt(torch.cat(style_src, dim=1), txt_src2trg,testing_bert, config_wb, txt_lens)
+        style_txt, _ = self.gen.encode_txt(torch.cat(style_src, dim=1), txt_src2trg, txt_lens)
 
         x_fake, x_fake_att = self.gen.decode(content, style_txt)
         if self.use_attention:
             x_fake = x_fake * x_fake_att  + x_real * (1-x_fake_att) 
         return x_fake
 
-    def gen_update(self, x_real, c_src, c_trg, txt_src2trg, testing_bert, config_wb, txt_lens, 
+    def gen_update(self, x_real, c_src, c_trg, txt_src2trg, txt_lens, 
         label_src, label_trg, configs, iters):
-        print("txt_lens for gen_update in solver", txt_lens)
-        
         self.gen_opt.zero_grad()
         # encode
         content_real, style_real, logvar = self.gen.encode(x_real)
@@ -187,37 +159,25 @@ class Solver(nn.Module):
             torch.cat(style_real,dim=1))
         if self.use_attention:
             x_real_rec = x_real_rec*x_real_rec_att + x_real*(1-x_real_rec_att)
-            
-            ''' This is where to implement 2-sided attention for within-domain'''
-            
-            
         content_real_rec, style_real_rec, _ = self.gen.encode(x_real_rec)
         
         # decode (cross domain)
         style_txt, logvar_txt = self.gen.encode_txt(torch.cat(style_real, dim=1), 
-            txt_src2trg, testing_bert, config_wb, txt_lens)
-        
+            txt_src2trg, txt_lens)
         x_fake, x_fake_att = self.gen.decode(content_real, 
             torch.cat(style_txt,dim=1))
-        
-        
         if self.use_attention:
             x_fake = x_fake*x_fake_att + x_real*(1-x_fake_att)
-            
-            ''' This is where to implement 2-sided attention for cross-domain'''
         
         #self.loss_ds = 0.0
         #if self.stddev > 0 and iters > self.ds_iter:
         style1 = dist_sampling_split(c_trg, self.c_dim, self.stddev, self.device)
         x_fake1, x_fake_att1 = self.gen.decode(content_real, style1)
-        
         style2 = dist_sampling_split(c_trg, self.c_dim, self.stddev, self.device)
         x_fake2, x_fake_att2 = self.gen.decode(content_real, style2)
-        
         if self.use_attention:
             x_fake1 = x_fake1*x_fake_att1 + x_real*(1-x_fake_att1)
             x_fake2 = x_fake2*x_fake_att2 + x_real*(1-x_fake_att2)
-            
         self.loss_ds = torch.mean(torch.abs(x_fake1 - x_fake2.detach()))
         content_rand, style_rand, _ = self.gen.encode(x_fake1)
         self.init_ds_w = max(self.init_ds_w-1/1e5, 0.0)
@@ -286,14 +246,14 @@ class Solver(nn.Module):
         target_fea = vgg(target_vgg)
         return torch.mean((self.instancenorm(img_fea) - self.instancenorm(target_fea)) ** 2)
 
-    def sample(self, x_real, txt_src2trg, testing_bert, config_wb, txt_lens):
+    def sample(self, x_real, txt_src2trg, txt_lens):
         self.eval()
         x_real_recon, x_ab, x_sam, x_att = [], [], [], []
         for i in range(x_real.size(0)):
             content_real, style_real, _ = self.gen.encode(x_real[i:i+1])
             style_real = torch.cat(style_real, dim=1)
             style_txt, logvar_txt = self.gen.encode_txt(style_real, 
-                txt_src2trg[i:i+1], testing_bert, config_wb, txt_lens[i:i+1])
+                txt_src2trg[i:i+1], txt_lens[i:i+1])
             style_txt = torch.cat(style_txt,dim=1)
             
             x_real_rec, x_real_rec_att = self.gen.decode(content_real, style_real)
@@ -321,14 +281,7 @@ class Solver(nn.Module):
         x_real_recon = torch.cat(x_real_recon)
         x_ab = torch.cat(x_ab)
         x_sam = torch.cat(x_sam)
-        
-        # x_real - source image
-        # x_real_recon - reconstructed source image (for content & visual attr constrain), 
-        # x_ab - manipulated image
-        # x_sam - sampled domain (for diversity)
-   
         outputs = [x_real, x_real_recon, x_ab, x_sam]
-        
         if self.use_attention:
             x_att = torch.cat(x_att)
             outputs.append((x_att-0.5)/0.5)
@@ -361,7 +314,7 @@ class Solver(nn.Module):
         r2_penalty = torch.mean(dydx_l2sqr**2)
         return r2_penalty
 
-    def dis_update(self, x_real, c_src, c_trg, txt_src2trg, testing_bert, config_wb, txt_lens, 
+    def dis_update(self, x_real, c_src, c_trg, txt_src2trg, txt_lens, 
         label_src, label_trg, configs, iters):
         self.dis_opt.zero_grad()
         content_real, style_real, _ = self.gen.encode(x_real)
@@ -369,7 +322,7 @@ class Solver(nn.Module):
 
         style1 = dist_sampling_split(c_trg, self.c_dim, self.stddev, self.device)
         style_txt, logvar_txt = self.gen.encode_txt(style_real, 
-            txt_src2trg, testing_bert, config_wb, txt_lens)
+            txt_src2trg, txt_lens)
         style_txt = torch.cat(style_txt, dim=1)
         x_fake, x_fake_att = self.gen.decode(content_real, style_txt)
         x_fake1, x_fake_att1 = self.gen.decode(content_real, style1)
@@ -406,9 +359,7 @@ class Solver(nn.Module):
     def resume(self, checkpoint_dir, configs):
         # Load generators
         last_model_name = get_model_list(checkpoint_dir, "gen")
-        print("last_model_name", last_model_name[2:])
-        
-        state_dict = torch.load(last_model_name[2:], map_location=lambda storage, loc: storage)
+        state_dict = torch.load(last_model_name, map_location=lambda storage, loc: storage)
         self.gen.load_state_dict(state_dict['a'])
         iterations = int(last_model_name[-15:-7]) if 'avg' in last_model_name else int(last_model_name[-11:-3])
         # Load discriminators
