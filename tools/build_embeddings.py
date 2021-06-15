@@ -21,7 +21,7 @@ words = [
     "example"
 ]
 
-# please download pretrained word embeddings the web page: https://fasttext.cc/docs/en/pretrained-vectors.html
+# please download pretrained word embeddings from the web page: https://fasttext.cc/docs/en/pretrained-vectors.html
 # or directly download from: https://dl.fbaipublicfiles.com/fasttext/vectors-wiki/wiki.en.zip
 # load pretrained word embeddings
 embeddings = load_model(opts.fasttext_model)
